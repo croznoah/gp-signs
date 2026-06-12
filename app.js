@@ -1,5 +1,31 @@
+import "./style.css";
+import embeddedAssetsSource from "./assets_embedded.js?raw";
+import * as pdfjsLib from "pdfjs-dist";
+import pdfjsWorkerSrc from "pdfjs-dist/build/pdf.worker.mjs?url";
+import tesseractCoreSrc from "tesseract.js-core/tesseract-core-lstm.wasm.js?url";
+import tesseractWorkerSrc from "tesseract.js/dist/worker.min.js?url";
+import engTrainedDataSrc from "@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz?url";
+import { createWorker } from "tesseract.js";
+import { jsPDF } from "jspdf";
+
 // Configure pdf.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
+
+function readEmbeddedAsset(name) {
+    return embeddedAssetsSource.match(new RegExp(`const ${name} = "([^"]+)"`))?.[1] || "";
+}
+
+const TEXTURE_B64 = readEmbeddedAsset("TEXTURE_B64");
+const FONT_CAPS_B64 = readEmbeddedAsset("FONT_CAPS_B64");
+const FONT_MINI_B64 = readEmbeddedAsset("FONT_MINI_B64");
+const resolveAssetUrl = (assetUrl) => new URL(assetUrl, window.location.href).href;
+const tesseractLangPath = new URL(".", resolveAssetUrl(engTrainedDataSrc)).href;
+let ocrWorkerPoolPromise = null;
+
+function loadPDFDocument(fileBuffer) {
+    const data = new Uint8Array(fileBuffer.slice(0));
+    return pdfjsLib.getDocument({ data }).promise;
+}
 
 // Design System Colors
 const colors = [
@@ -26,7 +52,8 @@ const strokeDetails = {
 // Global App State
 let state = {
     swimmers: [],
-    importing: false
+    importing: false,
+    meetInfo: "Parklawn Sign Generator"
 };
 
 // Initialize Application
@@ -74,6 +101,13 @@ function goToUpload() {
     document.getElementById('pdf-input').value = '';
     const uploadZone = document.querySelector('.upload-zone');
     if (uploadZone) uploadZone.classList.remove('hidden');
+
+    // Reset meet info
+    state.meetInfo = "Parklawn Sign Generator";
+    const meetInput = document.getElementById('meet-info-input');
+    if (meetInput) {
+        meetInput.value = "Parklawn Sign Generator";
+    }
 }
 
 // Update the swimmer count badge in header
@@ -93,6 +127,7 @@ async function handlePDFUpload(e) {
     }
 
     state.importing = true;
+    state.uploadedFileName = file.name;
     showProgress("Preparing meet sheet extraction...", 0);
 
     const reader = new FileReader();
@@ -150,11 +185,9 @@ function showProgressError(message) {
 // Quick text extraction from PDF
 async function extractText(fileBuffer) {
     showProgress("Extracting text layers...", 10);
-    // Slice the ArrayBuffer to avoid detaching the original buffer when consumed by PDF.js
-    const typedarray = new Uint8Array(fileBuffer.slice(0));
     
     // Propagate document load errors to trigger fallback OCR
-    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+    const pdf = await loadPDFDocument(fileBuffer);
 
     const pages = pdf.numPages;
     const extractedLines = [];
@@ -204,6 +237,15 @@ async function importSheet(lines, fileBuffer) {
     } else {
         showProgress("Processing swimmer list...", 80);
         state.swimmers = generateSwimmersFromTable(result.table);
+
+        // Guess meet info and update input
+        const guessedMeetInfo = guessMeetTitleAndDate(lines, state.uploadedFileName);
+        state.meetInfo = guessedMeetInfo;
+        const meetInput = document.getElementById('meet-info-input');
+        if (meetInput) {
+            meetInput.value = guessedMeetInfo;
+        }
+
         saveProject();
         renderSwimmerCards();
         setTimeout(() => {
@@ -215,11 +257,10 @@ async function importSheet(lines, fileBuffer) {
 
 // Tesseract OCR fallback
 async function runOCR(fileBuffer) {
-    // Slice the ArrayBuffer to prevent detaching the source buffer in PDF.js
-    const typedarray = new Uint8Array(fileBuffer.slice(0));
-    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+    const pdf = await loadPDFDocument(fileBuffer);
     const totalpages = pdf.numPages;
     const extractedLines = [];
+    const [leftWorker, rightWorker] = await getOCRWorkers();
 
     for (let a = 1; a <= totalpages; a++) {
         showProgress(`Rendering page ${a} of ${totalpages} for scanning...`, 35 + Math.ceil((a / totalpages) * 20));
@@ -242,10 +283,10 @@ async function runOCR(fileBuffer) {
         const righthalf = await preprocessImage(canvas, "right");
 
         showProgress(`OCR analyzing page ${a}...`, 35 + Math.ceil((a / totalpages) * 30));
-        const leftResult = await Tesseract.recognize(lefthalf, "eng");
-
-        showProgress(`OCR analyzing page ${a}...`, 35 + Math.ceil((a / totalpages) * 35));
-        const rightResult = await Tesseract.recognize(righthalf, "eng");
+        const [leftResult, rightResult] = await Promise.all([
+            leftWorker.recognize(lefthalf),
+            rightWorker.recognize(righthalf)
+        ]);
 
         extractedLines.push(...(leftResult.data.text.split("\n")));
         extractedLines.push(...(rightResult.data.text.split("\n")));
@@ -257,6 +298,15 @@ async function runOCR(fileBuffer) {
     } else {
         showProgress("Processing swimmer list...", 90);
         state.swimmers = generateSwimmersFromTable(result.table);
+
+        // Guess meet info and update input
+        const guessedMeetInfo = guessMeetTitleAndDate(extractedLines, state.uploadedFileName);
+        state.meetInfo = guessedMeetInfo;
+        const meetInput = document.getElementById('meet-info-input');
+        if (meetInput) {
+            meetInput.value = guessedMeetInfo;
+        }
+
         saveProject();
         renderSwimmerCards();
         setTimeout(() => {
@@ -264,6 +314,32 @@ async function runOCR(fileBuffer) {
             state.importing = false;
         }, 800);
     }
+}
+
+async function getOCRWorkers() {
+    if (!ocrWorkerPoolPromise) {
+        ocrWorkerPoolPromise = Promise.all([
+            createOCRWorker(),
+            createOCRWorker()
+        ]);
+    }
+    return ocrWorkerPoolPromise;
+}
+
+function createOCRWorker() {
+    return createWorker("eng", undefined, {
+        workerPath: resolveAssetUrl(tesseractWorkerSrc),
+        corePath: resolveAssetUrl(tesseractCoreSrc),
+        langPath: tesseractLangPath,
+        gzip: true
+    });
+}
+
+async function terminateOCRWorkers() {
+    if (!ocrWorkerPoolPromise) return;
+    const workers = await ocrWorkerPoolPromise;
+    ocrWorkerPoolPromise = null;
+    await Promise.all(workers.map(worker => worker.terminate()));
 }
 
 // Clean and contrast-enhance page images for Tesseract
@@ -294,7 +370,7 @@ async function preprocessImage(canvas, half) {
         halfCtx.filter = "contrast(200%)";
         halfCtx.drawImage(halfCanvas, 0, 0);
 
-        resolve(halfCanvas.toDataURL("image/png"));
+        resolve(halfCanvas);
     });
 }
 
@@ -489,6 +565,130 @@ function shuffleArray(array) {
     return arr;
 }
 
+// Update meet info title and date
+function updateMeetInfo(value) {
+    state.meetInfo = value;
+}
+
+// Guess meet title and date from text lines and filename
+function guessMeetTitleAndDate(lines, filename) {
+    let dateStr = "";
+    let titleStr = "";
+
+    // Regexes for Date
+    const slashesDateRegex = /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])[\/\-](\d{2,4})\b/;
+    const monthDateRegex = /\b(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?,\s*(\d{4})\b/i;
+
+    // 1. Try to find a date in filename
+    if (filename) {
+        const fileMatch1 = filename.match(slashesDateRegex);
+        if (fileMatch1) {
+            dateStr = fileMatch1[0];
+        } else {
+            const fileMatch2 = filename.match(monthDateRegex);
+            if (fileMatch2) {
+                dateStr = fileMatch2[0];
+            }
+        }
+    }
+
+    // 2. Try to find a date in the lines (first 40 lines)
+    if (!dateStr && lines && lines.length > 0) {
+        const limit = Math.min(lines.length, 40);
+        for (let i = 0; i < limit; i++) {
+            const line = lines[i];
+            const match1 = line.match(slashesDateRegex);
+            if (match1) {
+                dateStr = match1[0];
+                break;
+            }
+            const match2 = line.match(monthDateRegex);
+            if (match2) {
+                dateStr = match2[0];
+                break;
+            }
+        }
+    }
+
+    // If no date found, default to today's date formatted as M/D/YYYY
+    if (!dateStr) {
+        const d = new Date();
+        dateStr = `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+    }
+
+    // 3. Try to find a title in lines (first 40 lines)
+    let titleCandidates = [];
+    if (lines && lines.length > 0) {
+        const limit = Math.min(lines.length, 40);
+        for (let i = 0; i < limit; i++) {
+            let line = lines[i].trim();
+            if (!line) continue;
+
+            // Ignore swimmer lines or events/headers
+            if (line.includes(",") && (line.includes("Parklawn") || line.includes("PL")) && !line.includes(":")) {
+                continue;
+            }
+            if (line.includes("Event") || line.startsWith("#") || line.toLowerCase().includes("page")) {
+                continue;
+            }
+            if (line.length < 5 || line.length > 80) continue;
+            if (/^\d+$/.test(line)) continue;
+
+            let score = 0;
+            const lowerLine = line.toLowerCase();
+
+            if (lowerLine.includes("vs") || lowerLine.includes("vs.") || lowerLine.includes(" at ") || lowerLine.includes(" @ ")) score += 10;
+            if (lowerLine.includes("swim") || lowerLine.includes("meet") || lowerLine.includes("sheet")) score += 5;
+            if (lowerLine.includes("trial") || lowerLine.includes("trials")) score += 8;
+            if (lowerLine.includes("parklawn") || lowerLine.includes("pl")) score += 4;
+            if (lowerLine.includes("championship") || lowerLine.includes("divisional") || lowerLine.includes("relay")) score += 6;
+
+            if (score > 0) {
+                let cleaned = line;
+                cleaned = cleaned.replace(slashesDateRegex, "");
+                cleaned = cleaned.replace(monthDateRegex, "");
+                cleaned = cleaned.replace(/[-–—_]+$/, "").trim();
+                cleaned = cleaned.replace(/\s+/g, " ");
+                if (cleaned.length >= 5) {
+                    titleCandidates.push({ text: cleaned, score: score, index: i });
+                }
+            }
+        }
+    }
+
+    titleCandidates.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.index - b.index;
+    });
+
+    if (titleCandidates.length > 0) {
+        titleStr = titleCandidates[0].text;
+    } else if (filename) {
+        let name = filename.replace(/\.pdf$/i, "");
+        name = name.replace(/[_-]+/g, " ");
+        name = name.replace(slashesDateRegex, "");
+        name = name.replace(monthDateRegex, "");
+        name = name.trim();
+        if (name.length > 3) {
+            titleStr = name;
+        }
+    }
+
+    if (!titleStr) {
+        titleStr = "Parklawn Meet";
+    }
+
+    titleStr = titleStr.split(" ").map(w => {
+        if (w.toLowerCase() === "vs" || w.toLowerCase() === "vs.") return "vs.";
+        if (w.toLowerCase() === "at") return "at";
+        return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(" ");
+
+    titleStr = titleStr.replace(/[\s\-–—_]+$/, "").trim();
+
+    return `${titleStr} - ${dateStr}`;
+}
+
 // Convert extracted swimmers table to active objects
 function generateSwimmersFromTable(tableRows) {
     return tableRows.map((row, idx) => {
@@ -575,6 +775,11 @@ function addBlankSign() {
 function clearAllSigns() {
     if (confirm("Are you sure you want to clear all swimmers? This cannot be undone.")) {
         state.swimmers = [];
+        state.meetInfo = "Parklawn Sign Generator";
+        const meetInput = document.getElementById('meet-info-input');
+        if (meetInput) {
+            meetInput.value = "Parklawn Sign Generator";
+        }
         saveProject();
         renderSwimmerCards();
         goToUpload();
@@ -1020,7 +1225,6 @@ async function exportToPDF() {
     const FRONT_CANVAS_H = 850 * SCALE;
 
     try {
-        const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
 
         let backPageFont = 'helvetica';
@@ -1063,7 +1267,10 @@ async function exportToPDF() {
         }
 
         showExportOverlay('Saving PDF…');
-        doc.save('parklawn_signs.pdf');
+        const pdfFilename = state.meetInfo 
+            ? `${state.meetInfo.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_signs.pdf`
+            : 'parklawn_signs.pdf';
+        doc.save(pdfFilename);
 
     } catch (err) {
         console.error('PDF export failed:', err);
@@ -1083,3 +1290,23 @@ function downloadSVG(svgStr, filename) {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
+
+window.addEventListener('beforeunload', () => {
+    terminateOCRWorkers().catch((err) => console.warn('OCR worker cleanup failed:', err));
+});
+
+Object.assign(window, {
+    addBlankSign,
+    clearAllSigns,
+    deleteSwimmer,
+    duplicateSwimmer,
+    updateSwimmerFirstName,
+    updateSwimmerLastName,
+    toggleSwimmerStroke,
+    shuffleSwimmerColors,
+    shuffleSwimmerBorders,
+    shuffleSwimmerGraphic,
+    toggleSwimmerSignature,
+    exportToPDF,
+    updateMeetInfo
+});

@@ -294,6 +294,20 @@ input[type="text"]:focus {
     font-weight: 800;
     letter-spacing: -0.4px;
 }
+#meet-info-input {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    border: 3px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    padding: 6px 10px;
+    width: 320px;
+    outline: none;
+}
+#meet-info-input:focus {
+    background-color: var(--input-focus-bg);
+}
 .header-right {
     display: flex;
     gap: 12px;

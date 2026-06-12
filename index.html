@@ -10,14 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
     
-    <!-- Icons and Libraries -->
+    <!-- Icons -->
     <link rel="shortcut icon" type="image/x-icon" href="icons/logo.png"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js" integrity="sha512-ml/QKfG3+Yes6TwOzQb7aCNtJF4PUyha6R3w8pSTo/VJSywl7ZreYvvtUso7fKevpsI+pYVVwnu82YO0q3V6eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -50,7 +44,7 @@
         <header id="header-bar">
             <div class="header-left">
                 <div class="header-title-group">
-                    <h2>Parklawn Sign Generator</h2>
+                    <input type="text" id="meet-info-input" placeholder="Meet Title & Date" value="Parklawn Sign Generator" oninput="updateMeetInfo(this.value)" />
                     <span id="swimmer-count-badge" class="badge">0 Swimmers</span>
                 </div>
             </div>
@@ -73,9 +67,7 @@
     <!-- Hidden Print Container -->
     <div id="print-container"></div>
 
-    <!-- Embedded Assets (base64 fonts + texture) -->
-    <script src="assets_embedded.js"></script>
     <!-- App Logic -->
-    <script src="app.js"></script>
+    <script type="module" src="/app.js"></script>
 </body>
 </html>

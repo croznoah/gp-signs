@@ -1,0 +1,29 @@
+{
+  "name": "gp-signs",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/croznoah/gp-signs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/croznoah/gp-signs/issues"
+  },
+  "homepage": "https://github.com/croznoah/gp-signs#readme",
+  "dependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "jspdf": "^4.2.1",
+    "pdfjs-dist": "^6.0.227",
+    "tesseract.js": "^7.0.0",
+    "vite": "^8.0.16"
+  }
+}
