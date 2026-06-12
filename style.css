@@ -1,0 +1,550 @@
+/* Neo-Brutalist Design Tokens */
+:root {
+    --bg-color: #ffffff;
+    --accent-color: #000000;
+    --text-color: #000000;
+    --muted-text-color: #555555;
+    --border-color: #000000;
+    --card-bg-color: #ffffff;
+    
+    --screen-bg: #ffffff;
+    --editor-viewport-bg: #f7f7f7;
+    
+    /* Buttons */
+    --btn-bg: #ffffff;
+    --btn-color: #000000;
+    --btn-border: #000000;
+    --btn-hover-bg: #000000;
+    --btn-hover-color: #ffffff;
+    --btn-active-bg: #333333;
+    --btn-active-color: #ffffff;
+    
+    /* Input */
+    --input-bg: #ffffff;
+    --input-color: #000000;
+    --input-border: #000000;
+    --input-focus-bg: #fafafa;
+    
+    /* Badge */
+    --badge-bg: #000000;
+    --badge-color: #ffffff;
+    --badge-border: #000000;
+    
+    /* Cards */
+    --card-number-color: #555555;
+    --card-preview-bg: #ffffff;
+    --card-preview-border: rgba(0, 0, 0, 0.08);
+    --card-preview-shadow: 0 6px 16px rgba(0, 0, 0, 0.08), 0 2px 5px rgba(0, 0, 0, 0.05);
+    
+    /* Stroke Picker Buttons */
+    --btn-stroke-bg: #ffffff;
+    --btn-stroke-color: #000000;
+    --btn-stroke-border: #000000;
+    --btn-stroke-hover-bg: #f0f0f0;
+    --btn-stroke-active-bg: #000000;
+    --btn-stroke-active-color: #ffffff;
+    
+    /* Progress Bar */
+    --progress-bar-bg: #ffffff;
+    --progress-bar-fill-bg: #000000;
+    
+    /* Modals/Overlays */
+    --export-overlay-bg: rgba(0, 0, 0, 0.4);
+    --export-modal-bg: #ffffff;
+    --export-modal-border: #000000;
+    --export-loader-border: #e0e0e0;
+    --export-loader-top-color: #000000;
+    
+    --font-ui: 'Figtree', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    --texture: url("assets/texture.png");
+}
+
+/* Automatic System Dark Theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --accent-color: #ffffff;
+        --text-color: #e5e5e5;
+        --muted-text-color: #aaaaaa;
+        --border-color: #ffffff;
+        --card-bg-color: #1a1a1a;
+        
+        --screen-bg: #1a1a1a;
+        --editor-viewport-bg: #111111;
+        
+        /* Buttons */
+        --btn-bg: #1a1a1a;
+        --btn-color: #ffffff;
+        --btn-border: #ffffff;
+        --btn-hover-bg: #ffffff;
+        --btn-hover-color: #000000;
+        --btn-active-bg: #e0e0e0;
+        --btn-active-color: #000000;
+        
+        /* Input */
+        --input-bg: #262626;
+        --input-color: #ffffff;
+        --input-border: #ffffff;
+        --input-focus-bg: #2d2d2d;
+        
+        /* Badge */
+        --badge-bg: #ffffff;
+        --badge-color: #000000;
+        --badge-border: #ffffff;
+        
+        /* Cards */
+        --card-number-color: #aaaaaa;
+        --card-preview-bg: #ffffff; /* keep white to show actual print paper */
+        --card-preview-border: rgba(255, 255, 255, 0.15);
+        --card-preview-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), 0 2px 5px rgba(0, 0, 0, 0.2);
+        
+        /* Stroke Picker Buttons */
+        --btn-stroke-bg: #1a1a1a;
+        --btn-stroke-color: #ffffff;
+        --btn-stroke-border: #ffffff;
+        --btn-stroke-hover-bg: #2d2d2d;
+        --btn-stroke-active-bg: #ffffff;
+        --btn-stroke-active-color: #000000;
+        
+        /* Progress Bar */
+        --progress-bar-bg: #262626;
+        --progress-bar-fill-bg: #ffffff;
+        
+        /* Modals/Overlays */
+        --export-overlay-bg: rgba(0, 0, 0, 0.6);
+        --export-modal-bg: #1a1a1a;
+        --export-modal-border: #ffffff;
+        --export-loader-border: #333333;
+        --export-loader-top-color: #ffffff;
+    }
+}
+
+/* Custom Fonts */
+@font-face {
+    font-family: "Marker Sans";
+    font-style: normal;
+    font-weight: 400;
+    src: url(fonts/GP_Sans/MarkerSansCaps.ttf);
+}
+@font-face {
+    font-family: "Marker Sans Mini";
+    font-style: normal;
+    font-weight: 400;
+    src: url(fonts/GP_Sans/MarkerSansMini.ttf);
+}
+
+/* Reset and Global Styles */
+*:not(svg):not(svg *) {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-ui);
+    border-radius: 0px !important; /* Strict zero border radius */
+}
+
+/* Explicit font-family mapping for inline SVG text elements */
+svg text[font-family="Marker Sans"] {
+    font-family: "Marker Sans", sans-serif;
+}
+svg text[font-family="Marker Sans Mini"] {
+    font-family: "Marker Sans Mini", sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Base Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-family: var(--font-ui);
+    background-color: var(--btn-bg);
+    color: var(--btn-color);
+    border: 3px solid var(--btn-border);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+    outline: none;
+}
+.btn:hover {
+    background-color: var(--btn-hover-bg);
+    color: var(--btn-hover-color);
+    border-color: var(--btn-hover-bg);
+}
+.btn:active {
+    background-color: var(--btn-active-bg);
+    color: var(--btn-active-color);
+    border-color: var(--btn-active-bg);
+}
+.btn-primary {
+    background-color: var(--btn-bg);
+    border-color: var(--btn-border);
+}
+.btn-secondary {
+    background-color: var(--btn-bg);
+    border-color: var(--btn-border);
+}
+.btn-danger {
+    background-color: var(--btn-bg);
+    color: var(--btn-color);
+    border-color: var(--btn-border);
+}
+.btn-large {
+    padding: 12px 21px;
+    font-size: 18px;
+    border-width: 4px;
+}
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-width: 2px;
+}
+
+/* Badge count */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    background-color: var(--badge-bg);
+    color: var(--badge-color);
+    border: 2px solid var(--badge-border);
+}
+
+/* Inputs */
+input[type="text"] {
+    width: 100%;
+    padding: 8px 9px;
+    border: 3px solid var(--input-border);
+    background-color: var(--input-bg);
+    color: var(--input-color);
+    font-size: 14px;
+    outline: none;
+}
+input[type="text"]:focus {
+    border-color: var(--input-border);
+    background-color: var(--input-focus-bg);
+}
+
+/* Layout Screens */
+.screen {
+    display: none;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: var(--screen-bg);
+}
+.screen.active {
+    display: block;
+}
+
+/* Upload Screen Specifics */
+#upload-screen {
+    display: none;
+    place-items: center;
+    background-color: var(--screen-bg);
+}
+#upload-screen.active {
+    display: grid;
+}
+.upload-box {
+    width: 100%;
+    max-width: 500px;
+    padding: 40px;
+    border: 4px solid var(--border-color);
+    background-color: var(--screen-bg);
+    text-align: center;
+}
+.brand {
+    margin-bottom: 30px;
+}
+.logo-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+.brand h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+}
+.brand .description {
+    text-wrap: balance;
+    font-size: 14px;
+    color: var(--muted-text-color);
+    line-height: 1.5;
+}
+.progress-container {
+    margin-top: 24px;
+    text-align: left;
+}
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    border: 3px solid var(--border-color);
+    background-color: var(--progress-bar-bg);
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 10px;
+}
+.progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background-color: var(--progress-bar-fill-bg);
+    transition: width 0.1s ease;
+}
+.progress-bar-fill.error {
+    background-color: #ff5c60;
+}
+.progress-text {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.error-text {
+    color: #ff5c60;
+    font-weight: bold;
+}
+.hidden {
+    display: none !important;
+}
+
+/* Header Bar Styling */
+#header-bar {
+    height: 70px;
+    border-bottom: 4px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background-color: var(--header-bg);
+    z-index: 10;
+    position: relative;
+}
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.header-logo {
+    font-size: 24px;
+}
+.header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.header-title-group h2 {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+}
+.header-right {
+    display: flex;
+    gap: 12px;
+}
+
+/* Editor Scrolling Viewport */
+.editor-viewport {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 460px);
+    justify-content: center;
+    gap: 40px;
+    padding: 40px;
+    overflow-y: auto;
+    height: calc(100vh - 70px);
+    align-content: start;
+    background-color: var(--editor-viewport-bg);
+    scroll-behavior: smooth;
+}
+
+/* Swimmer Card layout */
+.swimmer-card {
+    flex: 0 0 auto;
+    width: 460px; /* Reset to single preview card width */
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+}
+.card-number {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--card-number-color);
+}
+.btn-card-delete {
+    background: transparent;
+    border: none;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 12px;
+    color: #ff5c60;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s ease;
+}
+.btn-card-delete:hover {
+    color: #ff0000;
+    text-decoration: underline;
+}
+
+.card-preview {
+    width: 460px;
+    height: 355px; /* Perfect scale for 1100x850 aspect ratio */
+    border: 1px solid var(--card-preview-border);
+    background-color: var(--card-preview-bg);
+    overflow: hidden;
+    box-shadow: var(--card-preview-shadow);
+    position: relative;
+}
+
+
+/* Border Images — now used as SVG <image> href attributes */
+
+
+/* Control Panel under the card */
+.card-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 5px;
+}
+.control-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.input-group label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.stroke-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+}
+.stroke-picker label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.stroke-buttons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+}
+/* Stroke picker buttons */
+.btn-stroke {
+    flex: 1;
+    padding: 8px;
+    font-weight: 700;
+    border: 3px solid var(--btn-stroke-border);
+    background-color: var(--btn-stroke-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    text-align: center;
+}
+.btn-stroke:hover {
+    background-color: var(--btn-stroke-hover-bg);
+}
+.btn-stroke.active {
+    background-color: var(--btn-stroke-active-bg);
+    color: var(--btn-stroke-active-color);
+    border-color: var(--btn-stroke-active-bg);
+}
+
+/* Hidden Print Container — kept for compatibility */
+#print-container {
+    display: none;
+}
+
+/* Export Overlay & Progress Modal */
+#export-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--export-overlay-bg);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+#export-overlay.active {
+    display: flex;
+}
+
+.export-modal {
+    background-color: var(--export-modal-bg);
+    border: 4px solid var(--export-modal-border);
+    padding: 40px;
+    width: 90%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: center;
+}
+
+.export-loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--export-loader-border);
+    border-top-color: var(--export-loader-top-color);
+    border-radius: 50% !important; /* Forces circular shape, overriding global zero-radius rule */
+    animation: spin 0.8s linear infinite;
+}
+
+#export-overlay-msg {
+    color: var(--text-color);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    line-height: 1.4;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
