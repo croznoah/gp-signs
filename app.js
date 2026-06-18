@@ -7,6 +7,7 @@ import tesseractCoreSrc from "tesseract.js-core/tesseract-core-lstm.wasm.js?url"
 import tesseractWorkerSrc from "tesseract.js/dist/worker.min.js?url";
 import { createWorker } from "tesseract.js";
 import { jsPDF } from "jspdf";
+import { detectMeetSheet } from "./meetSheetParser.js";
 
 // Configure pdf.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
@@ -373,187 +374,6 @@ async function preprocessImage(canvas, half) {
 
         resolve(halfCanvas);
     });
-}
-
-// Clean swimmer names from noise characters
-function correctName(name) {
-    const string = name.replace(/[^a-zA-Z\s\-]/g, "");
-    const words = string.split(" ");
-    let finalstring = "";
-    for (let k = 0; k < words.length; k++) {
-        const word = words[k].replace(/\s+/g, "");
-        if (word.replace(/[^a-zA-Z]/g, "").length > 1) {
-            finalstring += word + " ";
-        }
-    }
-    return finalstring.trim();
-}
-
-// Check if string contains stroke words
-function checkStrokes(stroke) {
-    if (!stroke) return false;
-    const s = stroke.toLowerCase();
-    return (s.includes("free") || s.includes("back") || s.includes("breast") || s.includes("fly"));
-}
-
-// Meet sheet formatting detection and parsing
-function detectMeetSheet(lines, useocr) {
-    const heattable = parseMeetSheetLines(lines, "heats", useocr);
-    const entriestable = parseMeetSheetLines(lines, "entries", useocr);
-
-    if (heattable.length < 1 && entriestable.length < 1) {
-        return { format: "", table: [] };
-    } else if (heattable.length >= entriestable.length) {
-        return { format: "heats", table: heattable };
-    } else {
-        return { format: "entries", table: entriestable };
-    }
-}
-
-// Line parsing implementation
-function parseMeetSheetLines(lines, format, useocr) {
-    const table = [];
-    const rawtable = [];
-    const names = new Set();
-    let strokearray = [];
-    const cleanLines = lines.filter(entry => entry.trim() !== "");
-
-    if (format === "heats") {
-        let currentStroke = false;
-        for (let i = 0; i < cleanLines.length; i++) {
-            const line = String(cleanLines[i]);
-            if (line.includes("Event") || line.includes("#")) {
-                if (line.toLowerCase().includes("free")) {
-                    currentStroke = "free";
-                } else if (line.toLowerCase().includes("back")) {
-                    currentStroke = "back";
-                } else if (line.toLowerCase().includes("breast")) {
-                    currentStroke = "breast";
-                } else if (line.toLowerCase().includes("butter")) {
-                    currentStroke = "fly";
-                } else if (line.toLowerCase().includes("im") || line.toLowerCase().includes("lm")) {
-                    currentStroke = "IM";
-                } else {
-                    currentStroke = false;
-                }
-            } else if ((line.includes("Parklawn") || line.includes("PL")) && line.includes(",") && !line.includes(":")) {
-                if (useocr) {
-                    const rawperson = line.replace(/^.*?(\d+)(.*?)(\d+).*$/, "$2").trim();
-                    const commaIdx = rawperson.indexOf(",");
-                    let lastname = "";
-                    let firstname = "";
-                    if (commaIdx !== -1) {
-                        lastname = correctName(rawperson.substring(0, commaIdx));
-                        firstname = correctName(rawperson.substring(commaIdx + 1));
-                    } else {
-                        // Fallback name splitting logic in case OCR misrecognizes or leaves out the comma
-                        const spaceIdx = rawperson.lastIndexOf(" ");
-                        if (spaceIdx !== -1) {
-                            lastname = correctName(rawperson.substring(spaceIdx + 1));
-                            firstname = correctName(rawperson.substring(0, spaceIdx));
-                        } else {
-                            firstname = correctName(rawperson);
-                        }
-                    }
-
-                    if (currentStroke && currentStroke !== "IM") {
-                        let exists = false;
-                        for (let d = 0; d < table.length; d++) {
-                            if (table[d][0].toLowerCase().trim() === firstname.toLowerCase() && 
-                                table[d][1].toLowerCase().trim() === lastname.toLowerCase()) {
-                                exists = d;
-                                break;
-                            }
-                        }
-
-                        if (exists === false) {
-                            table.push([firstname, lastname, [currentStroke]]);
-                        } else {
-                            table[exists][2].push(currentStroke);
-                        }
-                    }
-                } else {
-                    const person = line.replace("NT", "").replace(/[^a-zA-Z-, ]/g, "").replace("Parklawn", "").replace("PL", "").trim();
-                    const commaIdx = person.indexOf(",");
-                    if (commaIdx === -1) continue;
-                    const lastname = person.substring(0, commaIdx).trim();
-                    const firstname = person.substring(commaIdx + 1).trim();
-                    if (currentStroke && currentStroke !== "IM") {
-                        rawtable.push([firstname, lastname, currentStroke]);
-                        names.add(lastname + "," + firstname);
-                    }
-                }
-            }
-        }
-
-        if (!useocr) {
-            names.forEach(personStr => {
-                const commaIdx = personStr.indexOf(",");
-                const lastname = personStr.substring(0, commaIdx).trim();
-                const firstname = personStr.substring(commaIdx + 1).trim();
-                let strokes = [];
-                for (let c = 0; c < rawtable.length; c++) {
-                    if (rawtable[c][0] === firstname && rawtable[c][1] === lastname) {
-                        strokes.push(rawtable[c][2]);
-                    }
-                }
-                strokes = [...new Set(strokes)].filter(checkStrokes);
-                table.push([firstname, lastname, strokes]);
-            });
-        }
-    } else if (format === "entries") {
-        for (let i = 0; i < cleanLines.length; i++) {
-            const line = String(cleanLines[i]);
-            if (line.includes("(")) {
-                strokearray = [];
-                const person = line.replace(/[^a-zA-Z-, ]/g, "").replace("PL", "").trim();
-                let lastname = "";
-                let firstname = "";
-
-                if (person.includes(",")) {
-                    const commaIdx = person.indexOf(",");
-                    lastname = person.substring(0, commaIdx).trim();
-                    firstname = person.substring(commaIdx + 1).trim();
-                } else {
-                    const spaceIdx = person.indexOf(" ");
-                    if (spaceIdx === -1) {
-                        firstname = person;
-                    } else {
-                        firstname = person.substring(0, spaceIdx).trim();
-                        lastname = person.substring(spaceIdx + 1).trim();
-                    }
-                }
-
-                if (useocr) {
-                    lastname = lastname.replace(/(?<![a-zA-Z])-(?![a-zA-Z])/g, "").trim();
-                    firstname = firstname.replace(/(?<![a-zA-Z])-(?![a-zA-Z])/g, "").trim();
-                }
-
-                table.push([firstname, lastname, strokearray]);
-            } else {
-                const event = line.toLowerCase();
-                let stroke = false;
-                if (event.includes("free")) {
-                    stroke = "free";
-                } else if (event.includes("back")) {
-                    stroke = "back";
-                } else if (event.includes("breast")) {
-                    stroke = "breast";
-                } else if (event.includes("fly")) {
-                    stroke = "fly";
-                }
-
-                if (stroke) {
-                    strokearray.push(stroke);
-                }
-            }
-        }
-        // Deduplicate strokes in the arrays
-        table.forEach(row => {
-            row[2] = [...new Set(row[2])].filter(checkStrokes);
-        });
-    }
-    return table;
 }
 
 // Helper function to shuffle an array
@@ -1213,6 +1033,18 @@ async function exportToPDF() {
 
     const btn = document.getElementById('export-pdf-btn');
     if (btn) btn.disabled = true;
+    const swimmersForExport = state.swimmers
+        .map((swimmer, index) => ({ swimmer, index }))
+        .sort((a, b) => {
+            const lastNameCompare = a.swimmer.lastname.localeCompare(b.swimmer.lastname, undefined, { sensitivity: 'base' });
+            if (lastNameCompare !== 0) return lastNameCompare;
+
+            const firstNameCompare = a.swimmer.firstname.localeCompare(b.swimmer.firstname, undefined, { sensitivity: 'base' });
+            if (firstNameCompare !== 0) return firstNameCompare;
+
+            return a.index - b.index;
+        })
+        .map(({ swimmer }) => swimmer);
 
     // Letter landscape: 279.4 × 215.9 mm
     const PAGE_W_MM = 279.4, PAGE_H_MM = 215.9;
@@ -1243,9 +1075,9 @@ async function exportToPDF() {
             console.warn('Could not load Figtree font for PDF, falling back to Helvetica:', fontErr);
         }
 
-        for (let i = 0; i < state.swimmers.length; i++) {
-            const swimmer = state.swimmers[i];
-            showExportOverlay(`Rendering ${swimmer.firstname} ${swimmer.lastname} (${i + 1} / ${state.swimmers.length})…`);
+        for (let i = 0; i < swimmersForExport.length; i++) {
+            const swimmer = swimmersForExport[i];
+            showExportOverlay(`Rendering ${swimmer.firstname} ${swimmer.lastname} (${i + 1} / ${swimmersForExport.length})…`);
 
             // ── PAGE 1: Front sign — full landscape page ───────────────
             const frontSVGRaw = buildFrontSVG(swimmer, true);

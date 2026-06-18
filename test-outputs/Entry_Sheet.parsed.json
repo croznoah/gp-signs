@@ -1,0 +1,627 @@
+{
+  "source": "Entry+Sheet.pdf",
+  "format": "entries",
+  "count": 76,
+  "swimmers": [
+    {
+      "firstname": "Noel",
+      "lastname": "Abraha",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Ashton",
+      "lastname": "Ackert",
+      "strokes": [
+        "free",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Molly",
+      "lastname": "Ashe",
+      "strokes": [
+        "free",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Libby",
+      "lastname": "Beck",
+      "strokes": [
+        "back"
+      ]
+    },
+    {
+      "firstname": "Addy",
+      "lastname": "Bell",
+      "strokes": [
+        "breast",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Ainsley",
+      "lastname": "Bell",
+      "strokes": [
+        "free"
+      ]
+    },
+    {
+      "firstname": "Evan",
+      "lastname": "Bell",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Leah",
+      "lastname": "Belz",
+      "strokes": [
+        "breast",
+        "back",
+        "fly",
+        "free"
+      ]
+    },
+    {
+      "firstname": "Eddie",
+      "lastname": "Boynton",
+      "strokes": [
+        "back",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Jonny",
+      "lastname": "Boynton",
+      "strokes": [
+        "back",
+        "free",
+        "breast",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Grace",
+      "lastname": "Carry",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Addie",
+      "lastname": "Celentano",
+      "strokes": [
+        "free",
+        "back",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Coco",
+      "lastname": "Celentano",
+      "strokes": [
+        "back",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Gabriel",
+      "lastname": "Cervoni",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Lili",
+      "lastname": "Cervoni",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Katherine",
+      "lastname": "Chalmers",
+      "strokes": [
+        "free",
+        "back",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Malcolm",
+      "lastname": "Coon",
+      "strokes": [
+        "free"
+      ]
+    },
+    {
+      "firstname": "Cc",
+      "lastname": "Corbett",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Kenzie",
+      "lastname": "Corbett",
+      "strokes": [
+        "free",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Quade",
+      "lastname": "Corbett",
+      "strokes": [
+        "free",
+        "back",
+        "breast",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Oliver",
+      "lastname": "Dvorak",
+      "strokes": [
+        "free",
+        "back",
+        "breast",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Ori",
+      "lastname": "Garcia-Johnson",
+      "strokes": [
+        "back",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Gus",
+      "lastname": "Garrison",
+      "strokes": [
+        "free"
+      ]
+    },
+    {
+      "firstname": "Grayson",
+      "lastname": "Goldwater",
+      "strokes": [
+        "breast",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Parker",
+      "lastname": "Goldwater",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Paul",
+      "lastname": "Gould",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Keaton",
+      "lastname": "Gutierrez",
+      "strokes": [
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Tallie",
+      "lastname": "Gutierrez",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "James",
+      "lastname": "Hadley",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Sebastian",
+      "lastname": "Hadley",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Maddie",
+      "lastname": "Haines",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Avery",
+      "lastname": "Harris",
+      "strokes": [
+        "back",
+        "breast",
+        "free"
+      ]
+    },
+    {
+      "firstname": "Will",
+      "lastname": "Henderson",
+      "strokes": [
+        "breast",
+        "back",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Charlotte",
+      "lastname": "Hill",
+      "strokes": [
+        "back",
+        "fly",
+        "free",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Emma",
+      "lastname": "Hsia",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Katherine",
+      "lastname": "Hungerford",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Rebecca",
+      "lastname": "Hungerford",
+      "strokes": [
+        "breast",
+        "fly",
+        "free",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Alina",
+      "lastname": "Kinder",
+      "strokes": [
+        "free",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Anya",
+      "lastname": "Kinder",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Seth",
+      "lastname": "Kirk",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Jaxson",
+      "lastname": "Kurz",
+      "strokes": [
+        "back",
+        "fly",
+        "free"
+      ]
+    },
+    {
+      "firstname": "Emilia",
+      "lastname": "Laihow",
+      "strokes": [
+        "back"
+      ]
+    },
+    {
+      "firstname": "Alexandra",
+      "lastname": "Lee",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Danny",
+      "lastname": "Lee",
+      "strokes": [
+        "free",
+        "fly",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Amelia",
+      "lastname": "Lopez",
+      "strokes": [
+        "back",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Jackson",
+      "lastname": "Lopez",
+      "strokes": [
+        "breast",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Abby",
+      "lastname": "Macdonald",
+      "strokes": [
+        "back"
+      ]
+    },
+    {
+      "firstname": "Zack",
+      "lastname": "Macdonald",
+      "strokes": [
+        "free",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Connor",
+      "lastname": "Manegold",
+      "strokes": [
+        "back",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Max",
+      "lastname": "Manegold",
+      "strokes": [
+        "fly",
+        "free",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Raph",
+      "lastname": "Mesmer",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Danny",
+      "lastname": "Murphy",
+      "strokes": [
+        "free",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Calvin",
+      "lastname": "Oliphant",
+      "strokes": [
+        "back",
+        "fly",
+        "free"
+      ]
+    },
+    {
+      "firstname": "Lucy",
+      "lastname": "Oliphant",
+      "strokes": [
+        "free",
+        "fly",
+        "breast",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Aurelia",
+      "lastname": "Pelletier",
+      "strokes": [
+        "free",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Miriam",
+      "lastname": "Popp",
+      "strokes": [
+        "free"
+      ]
+    },
+    {
+      "firstname": "Noah",
+      "lastname": "Popp",
+      "strokes": [
+        "breast",
+        "fly",
+        "free"
+      ]
+    },
+    {
+      "firstname": "Archer",
+      "lastname": "Roberts",
+      "strokes": [
+        "breast",
+        "fly",
+        "free",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Betsy",
+      "lastname": "Rothschild",
+      "strokes": [
+        "back"
+      ]
+    },
+    {
+      "firstname": "Cian",
+      "lastname": "Shea",
+      "strokes": [
+        "back",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Kellan",
+      "lastname": "Smith",
+      "strokes": [
+        "free",
+        "breast",
+        "back"
+      ]
+    },
+    {
+      "firstname": "Jessie",
+      "lastname": "Snow",
+      "strokes": [
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Emmett",
+      "lastname": "Sobral",
+      "strokes": [
+        "breast",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Mason",
+      "lastname": "Sobral",
+      "strokes": [
+        "back"
+      ]
+    },
+    {
+      "firstname": "Cami",
+      "lastname": "Sonn",
+      "strokes": [
+        "fly",
+        "free",
+        "back",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Yaroslav",
+      "lastname": "Stratan",
+      "strokes": [
+        "back",
+        "free",
+        "fly",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Bridgette",
+      "lastname": "Van Hooser",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Meghan",
+      "lastname": "Van Hooser",
+      "strokes": [
+        "free",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Oliver",
+      "lastname": "Van Niekerk",
+      "strokes": [
+        "back"
+      ]
+    },
+    {
+      "firstname": "Emory",
+      "lastname": "Vickrey-Lau",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Kaiya",
+      "lastname": "Vickrey-Lau",
+      "strokes": [
+        "back",
+        "fly",
+        "free",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Ivy",
+      "lastname": "Weathers",
+      "strokes": [
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Archie",
+      "lastname": "Wiedemann",
+      "strokes": [
+        "back",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Emmett",
+      "lastname": "Wiedemann",
+      "strokes": [
+        "free",
+        "back",
+        "fly"
+      ]
+    },
+    {
+      "firstname": "Sophia",
+      "lastname": "Wolf-Barnett",
+      "strokes": [
+        "back",
+        "breast"
+      ]
+    },
+    {
+      "firstname": "Amelia",
+      "lastname": "Young",
+      "strokes": [
+        "back",
+        "breast",
+        "free",
+        "fly"
+      ]
+    }
+  ]
+}
