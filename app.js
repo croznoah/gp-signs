@@ -1,5 +1,6 @@
 import "./style.css";
 import embeddedAssetsSource from "./assets_embedded.js?raw";
+import figtreeRegularUrl from "./fonts/Figtree/Figtree-Regular.ttf?url";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorkerSrc from "pdfjs-dist/build/pdf.worker.mjs?url";
 import tesseractCoreSrc from "tesseract.js-core/tesseract-core-lstm.wasm.js?url";
@@ -1119,6 +1120,9 @@ const _borderCache = {};
 async function fetchAsBase64(url) {
     if (_borderCache[url]) return _borderCache[url];
     const resp = await fetch(url);
+    if (!resp.ok) {
+        throw new Error(`Failed to fetch ${url}: ${resp.status}`);
+    }
     const blob = await resp.blob();
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -1229,7 +1233,7 @@ async function exportToPDF() {
 
         let backPageFont = 'helvetica';
         try {
-            const fontUrl = 'fonts/Figtree/Figtree-Regular.ttf';
+            const fontUrl = resolveAssetUrl(figtreeRegularUrl);
             const fontData = await fetchAsBase64(fontUrl);
             const fontBase64 = fontData.split(',')[1];
             doc.addFileToVFS('Figtree-Regular.ttf', fontBase64);
