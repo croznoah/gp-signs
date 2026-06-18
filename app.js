@@ -4,7 +4,6 @@ import * as pdfjsLib from "pdfjs-dist";
 import pdfjsWorkerSrc from "pdfjs-dist/build/pdf.worker.mjs?url";
 import tesseractCoreSrc from "tesseract.js-core/tesseract-core-lstm.wasm.js?url";
 import tesseractWorkerSrc from "tesseract.js/dist/worker.min.js?url";
-import engTrainedDataSrc from "@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz?url";
 import { createWorker } from "tesseract.js";
 import { jsPDF } from "jspdf";
 
@@ -19,7 +18,8 @@ const TEXTURE_B64 = readEmbeddedAsset("TEXTURE_B64");
 const FONT_CAPS_B64 = readEmbeddedAsset("FONT_CAPS_B64");
 const FONT_MINI_B64 = readEmbeddedAsset("FONT_MINI_B64");
 const resolveAssetUrl = (assetUrl) => new URL(assetUrl, window.location.href).href;
-const tesseractLangPath = new URL(".", resolveAssetUrl(engTrainedDataSrc)).href;
+const appBaseUrl = new URL(import.meta.env.BASE_URL, window.location.origin);
+const tesseractLangPath = new URL("assets/", appBaseUrl).href;
 let ocrWorkerPoolPromise = null;
 
 function loadPDFDocument(fileBuffer) {
