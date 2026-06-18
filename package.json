@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/croznoah/gp-signs/issues"
   },
-  "homepage": "https://github.com/croznoah/gp-signs#readme",
+  "homepage": "https://croznoah.github.io/gp-signs/",
   "dependencies": {
     "@tesseract.js-data/eng": "^1.0.0",
     "jspdf": "^4.2.1",
