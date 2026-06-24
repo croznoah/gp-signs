@@ -20,7 +20,7 @@
         <div class="upload-box">
             <div class="brand">
                 <h1>Parklawn Sign Generator</h1>
-                <p class="description">Upload a meet sheet PDF to automatically extract swimmers and generate pool deck signs.</p>
+                <p class="description">Upload a meet sheet PDF to automatically extract swimmers and generate gp signs.</p>
             </div>
             
             <div class="upload-zone">
@@ -37,6 +37,10 @@
                 <div id="progress-text" class="progress-text">Preparing extraction...</div>
             </div>
         </div>
+
+        <div class="learn-more-container">
+            <a href="./about/" class="learn-more-link">Learn how signs are generated</a>
+        </div>
     </div>
 
     <!-- Editor Screen -->
@@ -49,6 +53,9 @@
                 </div>
             </div>
             <div class="header-right">
+                <a href="./about/" class="btn btn-secondary" style="text-decoration: none;">
+                    About the Art
+                </a>
                 <button class="btn btn-secondary" onclick="addBlankSign();">
                     Add Swimmer
                 </button>
@@ -63,6 +70,8 @@
             <!-- Swimmer Cards will be injected here dynamically -->
         </main>
     </div>
+
+
 
     <!-- Hidden Print Container -->
     <div id="print-container"></div>

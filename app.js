@@ -12,13 +12,17 @@ import { detectMeetSheet } from "./meetSheetParser.js";
 // Configure pdf.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerSrc;
 
-function readEmbeddedAsset(name) {
-    return embeddedAssetsSource.match(new RegExp(`const ${name} = "([^"]+)"`))?.[1] || "";
-}
-
-const TEXTURE_B64 = readEmbeddedAsset("TEXTURE_B64");
-const FONT_CAPS_B64 = readEmbeddedAsset("FONT_CAPS_B64");
-const FONT_MINI_B64 = readEmbeddedAsset("FONT_MINI_B64");
+import {
+    TEXTURE_B64,
+    FONT_CAPS_B64,
+    FONT_MINI_B64,
+    colors,
+    strokeDetails,
+    texEl,
+    svgDefs,
+    buildFrontSVG,
+    buildBackSVG
+} from "./svgBuilder.js";
 const resolveAssetUrl = (assetUrl) => new URL(assetUrl, window.location.href).href;
 const appBaseUrl = new URL(import.meta.env.BASE_URL, window.location.origin);
 const tesseractLangPath = new URL("assets/", appBaseUrl).href;
@@ -29,27 +33,7 @@ function loadPDFDocument(fileBuffer) {
     return pdfjsLib.getDocument({ data }).promise;
 }
 
-// Design System Colors
-const colors = [
-    "#906cc4",
-    "#ff5c60",
-    "#ffae30",
-    "#fee250",
-    "#2ebf83",
-    "#0570e5",
-    "#8A93FF",
-    "#3debd9",
-    "#009bb0",
-    "#ac0194"
-];
-
-// Stroke definitions
-const strokeDetails = {
-    free: { text: "When you swim free<br>first place you'll be!", icon: "0" },
-    back: { text: "When you swim back<br>you show no lack!", icon: "1" },
-    breast: { text: "When you swim breast<br>you are the best!", icon: "2" },
-    fly: { text: "When you swim fly<br>you wave bye-bye!", icon: "3" }
-};
+// Design System Colors and strokeDetails are imported from svgBuilder.js
 
 // Global App State
 let state = {
@@ -72,15 +56,44 @@ function setupEventListeners() {
     }
 }
 
-// Load project from localStorage (Disabled for fresh starts)
+// Load project from sessionStorage
 function loadProject() {
+    try {
+        const stored = sessionStorage.getItem('gp-signs-project');
+        if (stored) {
+            const data = JSON.parse(stored);
+            state.swimmers = data.swimmers || [];
+            state.meetInfo = data.meetInfo || "Parklawn Sign Generator";
+            
+            const meetInput = document.getElementById('meet-info-input');
+            if (meetInput) {
+                meetInput.value = state.meetInfo;
+            }
+            
+            if (state.swimmers.length > 0) {
+                renderSwimmerCards();
+                showScreen('editor-screen');
+                return;
+            }
+        }
+    } catch (e) {
+        console.warn("Failed to load project from sessionStorage:", e);
+    }
     state.swimmers = [];
     showScreen('upload-screen');
 }
 
-// Save project to localStorage (Disabled for fresh starts)
+// Save project to sessionStorage
 function saveProject() {
     updateSwimmerCount();
+    try {
+        sessionStorage.setItem('gp-signs-project', JSON.stringify({
+            swimmers: state.swimmers,
+            meetInfo: state.meetInfo
+        }));
+    } catch (e) {
+        console.warn("Failed to save project to sessionStorage:", e);
+    }
 }
 
 // Screen management
@@ -781,157 +794,7 @@ function renderSwimmerCards() {
     });
 }
 
-// SVG defs: embedded fonts + texture grain filter + hue filters
-
-// ---------- SVG BUILDER HELPERS ----------
-
-// Returns a <rect> clipped to the given clipPath id, filled with color + texture overlay
-// This replicates CSS `background-clip: text` behavior in pure SVG
-function texEl(clipId, color, texPatId, W, H, opacity) {
-    return `
-        <rect x="0" y="0" width="${W}" height="${H}" fill="${color}" clip-path="url(#${clipId})"/>
-        <rect x="0" y="0" width="${W}" height="${H}" fill="url(#${texPatId})" clip-path="url(#${clipId})" opacity="${opacity !== undefined ? opacity : 0.45}"/>`;
-}
-
-// Build shared defs block. For preview (inline SVG), fonts come from document CSS.
-// For export (standalone SVG file), embed fonts as base64.
-function svgDefs(swimmer, forExport) {
-    const sid = swimmer.id;
-    const fontStyle = forExport ? `<style>
-        @font-face{font-family:'Marker Sans';src:url('${FONT_CAPS_B64}') format('truetype');}
-        @font-face{font-family:'Marker Sans Mini';src:url('${FONT_MINI_B64}') format('truetype');}
-    </style>` : '';
-
-    return `<defs>
-        ${fontStyle}
-        <pattern id="tp${sid}" patternUnits="userSpaceOnUse" width="70" height="70">
-            <image href="${TEXTURE_B64}" x="0" y="0" width="70" height="70" preserveAspectRatio="xMidYMid slice"/>
-        </pattern>
-        <filter id="ho${sid}" color-interpolation-filters="sRGB">
-            <feColorMatrix type="hueRotate" values="${swimmer.outerhue}"/>
-        </filter>
-        <filter id="hi${sid}" color-interpolation-filters="sRGB">
-            <feColorMatrix type="hueRotate" values="${swimmer.innerhue}"/>
-        </filter>
-    </defs>`;
-}
-
-// Build front SVG string
-function buildFrontSVG(swimmer, forExport) {
-    const W = 1100, H = 850;
-    const sid = swimmer.id;
-    const sfx = forExport ? 'e' : 'p'; // 'p'review vs 'e'xport namespace
-    const cls = forExport ? '' : 'class="front-svg"';
-
-    const strokeTop = swimmer.strokes[0] ? strokeDetails[swimmer.strokes[0]] : null;
-    const strokeBottom = swimmer.strokes[1] ? strokeDetails[swimmer.strokes[1]] : null;
-
-    // --- Name text layout ---
-    const nameX = W / 2;
-    const nameY = H / 2 + swimmer.nameinputsize * 0.35;
-
-    // --- Graphic icon layout ---
-    const grX = W * 0.14;
-    const grY = H * 0.18 + swimmer.graphicsize * 0.85;
-
-    // --- Stroke top layout ---
-    let stTopClips = '', stTopEls = '';
-    if (strokeTop) {
-        const lines = strokeTop.text.split('<br>');
-        const iSz = swimmer.stroketopsize * 2.17;
-        const tSz = swimmer.stroketopsize;
-        const bx = W * 0.86 - 520;
-        const by = H * 0.18;
-        const textOffset = iSz * 1.0;
-        stTopClips = `
-            <clipPath id="csti${sfx}${sid}">
-                <text x="${bx}" y="${by + iSz * 0.85}" font-family="Marker Sans Mini" font-size="${iSz}">${strokeTop.icon}</text>
-            </clipPath>
-            <clipPath id="cst1${sfx}${sid}">
-                <text x="${bx + textOffset}" y="${by + tSz}" font-family="Marker Sans Mini" font-size="${tSz}">${lines[0] || ''}</text>
-            </clipPath>
-            <clipPath id="cst2${sfx}${sid}">
-                <text x="${bx + textOffset}" y="${by + tSz * 2.1}" font-family="Marker Sans Mini" font-size="${tSz}">${lines[1] || ''}</text>
-            </clipPath>`;
-        stTopEls = `
-            ${texEl(`csti${sfx}${sid}`, swimmer.stroketopcolor, `tp${sid}`, W, H)}
-            ${texEl(`cst1${sfx}${sid}`, swimmer.stroketopcolor, `tp${sid}`, W, H)}
-            ${texEl(`cst2${sfx}${sid}`, swimmer.stroketopcolor, `tp${sid}`, W, H)}`;
-    }
-
-    // --- Stroke bottom layout ---
-    let stBotClips = '', stBotEls = '';
-    if (strokeBottom) {
-        const lines = strokeBottom.text.split('<br>');
-        const iSz = swimmer.strokebottomsize * 2.17;
-        const tSz = swimmer.strokebottomsize;
-        const bx = W * 0.14;
-        const by = H * 0.82 - iSz - 35;
-        const textOffset = iSz * 1.0;
-        stBotClips = `
-            <clipPath id="csbi${sfx}${sid}">
-                <text x="${bx}" y="${by + iSz * 0.85}" font-family="Marker Sans Mini" font-size="${iSz}">${strokeBottom.icon}</text>
-            </clipPath>
-            <clipPath id="csb1${sfx}${sid}">
-                <text x="${bx + textOffset}" y="${by + tSz}" font-family="Marker Sans Mini" font-size="${tSz}">${lines[0] || ''}</text>
-            </clipPath>
-            <clipPath id="csb2${sfx}${sid}">
-                <text x="${bx + textOffset}" y="${by + tSz * 2.1}" font-family="Marker Sans Mini" font-size="${tSz}">${lines[1] || ''}</text>
-            </clipPath>`;
-        stBotEls = `
-            ${texEl(`csbi${sfx}${sid}`, swimmer.strokebottomcolor, `tp${sid}`, W, H)}
-            ${texEl(`csb1${sfx}${sid}`, swimmer.strokebottomcolor, `tp${sid}`, W, H)}
-            ${texEl(`csb2${sfx}${sid}`, swimmer.strokebottomcolor, `tp${sid}`, W, H)}`;
-    }
-
-    const sigSVG = swimmer.showSignature
-        ? `<image href="borders/lovegp.png" x="${W * 0.70}" y="${H * 0.70}" height="${swimmer.signaturesize}" preserveAspectRatio="xMidYMid meet"/>`
-        : '';
-
-    return `<svg ${cls} viewBox="0 0 ${W} ${H}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        ${svgDefs(swimmer, forExport)}
-        <defs>
-            <clipPath id="cn${sfx}${sid}">
-                <text x="${nameX}" y="${nameY}" font-family="Marker Sans" font-size="${swimmer.nameinputsize}" text-anchor="middle" letter-spacing="0.9">${swimmer.firstname.toUpperCase()}</text>
-            </clipPath>
-            <clipPath id="cg${sfx}${sid}">
-                <text x="${grX}" y="${grY}" font-family="Marker Sans Mini" font-size="${swimmer.graphicsize}">${swimmer.randomgraphic}</text>
-            </clipPath>
-            ${stTopClips}
-            ${stBotClips}
-        </defs>
-        <rect width="${W}" height="${H}" fill="white"/>
-        <image href="borders/outer/${swimmer.outerborder}.png" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" filter="url(#ho${sid})"/>
-        <image href="borders/inner/${swimmer.innerborder}.png" x="${W*0.01}" y="${H*0.01}" width="${W*0.98}" height="${H*0.98}" preserveAspectRatio="none" filter="url(#hi${sid})"/>
-        ${texEl(`cn${sfx}${sid}`, swimmer.namecolor, `tp${sid}`, W, H)}
-        ${texEl(`cg${sfx}${sid}`, swimmer.graphiccolor, `tp${sid}`, W, H)}
-        ${stTopEls}
-        ${stBotEls}
-        ${sigSVG}
-    </svg>`;
-}
-
-// Build back SVG string
-function buildBackSVG(swimmer, forExport) {
-    const W = 1100, H = 850;
-    const sid = swimmer.id;
-    const sfx = forExport ? 'e' : 'p';
-    const cls = forExport ? '' : 'class="back-svg"';
-    const lastNameY = H / 2 + 160 * 0.35;
-
-    return `<svg ${cls} viewBox="0 0 ${W} ${H}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        ${svgDefs(swimmer, forExport)}
-        <defs>
-            <clipPath id="cl${sfx}${sid}">
-                <text x="${W/2}" y="${lastNameY}" font-family="Marker Sans" font-size="160" text-anchor="middle" letter-spacing="0.9">${swimmer.lastname.toUpperCase()}</text>
-            </clipPath>
-        </defs>
-        <rect width="${W}" height="${H}" fill="white"/>
-        <image href="borders/outer/${swimmer.outerborder}.png" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" filter="url(#ho${sid})"/>
-        <image href="borders/inner/${swimmer.innerborder}.png" x="${W*0.01}" y="${H*0.01}" width="${W*0.98}" height="${H*0.98}" preserveAspectRatio="none" filter="url(#hi${sid})"/>
-        ${texEl(`cl${sfx}${sid}`, '#000000', `tp${sid}`, W, H)}
-    </svg>`;
-}
+// SVG rendering functions are imported from svgBuilder.js
 
 // Cache for border image base64 data, keyed by relative URL
 const _borderCache = {};

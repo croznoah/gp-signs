@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About the Graphics - Parklawn Sign Generator</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="shortcut icon" type="image/x-icon" href="../icons/logo.png"/>
+</head>
+<body>
+
+    <!-- About Screen -->
+    <div id="about-screen" class="screen active">
+        <header id="header-bar">
+            <div class="header-left">
+                <div class="header-title-group">
+                    <span class="about-header-title">About the Art &amp; Graphics</span>
+                </div>
+            </div>
+        </header>
+        
+        <main class="about-viewport">
+            <div class="about-container">
+                <section class="about-section">
+                    <h2 class="section-title">Faking GP Signs</h2>
+                    <div class="about-grid">
+                        <div class="about-card">
+                            <div class="about-card-badge">01</div>
+                            <h3>Sharpies &amp; 15-18s</h3>
+                            <p>Traditionally, GP signs are hand-drawn by the 15-18s every Friday after practice. As the team grow, this became a 4 hour commitment. This become impossible to continue, so I built a program to do it for us.</p>
+                        </div>
+                        <div class="about-card">
+                            <div class="about-card-badge">02</div>
+                            <h3>The Design</h3>
+                            <p>Every swimmer gets a unique sign. The generator selects color pairings and border frames, creating thousands of distinct style variations.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="section-title">Fonts, Textures &amp; Variations</h2>
+                    <p class="section-desc">The rendering system uses a custom digital design kit created specifically for the Great Piranhas team to simulate authentic GP signs.</p>
+                    <div class="about-grid">
+                        <div class="about-card card-flex-col">
+                            <!-- Preview Box -->
+                            <div class="about-preview-box">
+                                <svg viewBox="0 0 250 60" class="about-preview-svg">
+                                    <defs>
+                                        <pattern id="showcase-texture-1" patternUnits="userSpaceOnUse" width="70" height="70">
+                                            <image href="../assets/texture.png" x="0" y="0" width="70" height="70"/>
+                                        </pattern>
+                                        <clipPath id="clip-caps-card">
+                                            <text x="125" y="44" font-family="Marker Sans" font-size="34" text-anchor="middle">MARKER SANS</text>
+                                        </clipPath>
+                                    </defs>
+                                    <rect x="0" y="0" width="250" height="60" fill="#ff5c60" clip-path="url(#clip-caps-card)" />
+                                    <rect x="0" y="0" width="250" height="60" fill="url(#showcase-texture-1)" clip-path="url(#clip-caps-card)" opacity="0.45" />
+                                </svg>
+                            </div>
+                            <div class="about-card-badge">Font 1</div>
+                            <h3>Marker Sans</h3>
+                            <p>A thick, uppercase font used for swimmer names, simulating drawing with a wide chisel-tip marker.</p>
+                        </div>
+                        <div class="about-card card-flex-col">
+                            <!-- Preview Box -->
+                            <div class="about-preview-box">
+                                <svg viewBox="0 0 250 60" class="about-preview-svg">
+                                    <defs>
+                                        <pattern id="showcase-texture-2" patternUnits="userSpaceOnUse" width="70" height="70">
+                                            <image href="../assets/texture.png" x="0" y="0" width="70" height="70"/>
+                                        </pattern>
+                                        <clipPath id="clip-mini-card">
+                                            <text x="125" y="44" font-family="Marker Sans Mini" font-size="24" text-anchor="middle">marker sans mini</text>
+                                        </clipPath>
+                                    </defs>
+                                    <rect x="0" y="0" width="250" height="60" fill="#906cc4" clip-path="url(#clip-mini-card)" />
+                                    <rect x="0" y="0" width="250" height="60" fill="url(#showcase-texture-2)" clip-path="url(#clip-mini-card)" opacity="0.45" />
+                                </svg>
+                            </div>
+                            <div class="about-card-badge">Font 2</div>
+                            <h3>Marker Sans Mini</h3>
+                            <p>A lighter, character-rich font containing lowercase rhyming couplets, and housing the vector icons mapped directly to characters 0-9.</p>
+                        </div>
+                        <div class="about-card card-flex-col">
+                            <!-- Preview Box -->
+                            <div class="about-preview-texture">
+                            </div>
+                            <div class="about-card-badge">Texture</div>
+                            <h3>Marker Pattern</h3>
+                            <p>To simulate real markers, I hand-scanned and edited a real marker drawing texture. This texture masks overlays this texture over text to mimic the hand-drawn feel.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="section-title">Anatomy of a Sign</h2>
+                    <div class="anatomy-breakdown">
+                        <div class="anatomy-visual">
+                            <div id="anatomy-svg-container" class="card-preview"></div>
+                        </div>
+                        <div class="anatomy-legend">
+                            <div class="legend-item">
+                                <span class="legend-box" style="background-color: #ff5c60;"></span>
+                                <div>
+                                    <strong>Outer Border Frame</strong>
+                                    <p>One of 17 hand-designed frames, dynamically color-shifted using an SVG hue filter.</p>
+                                </div>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-box" style="background-color: #8A93FF;"></span>
+                                <div>
+                                    <strong>Inner Border Accent</strong>
+                                    <p>One of 9 hand-designed frames, dynamically color-shifted using an SVG hue filter.</p>
+                                </div>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-box" style="background-color: #fee250;"></span>
+                                <div>
+                                    <strong>Marker Typography</strong>
+                                    <p>Custom 'Marker Sans' font, styled with a paper grain overlay to simulate real markers.</p>
+                                </div>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-box" style="background-color: #906cc4;"></span>
+                                <div>
+                                    <strong>Mascots &amp; Stroke Rhymes</strong>
+                                    <p>Interactive swimming figures and encouraging graphics map to freestyle, backstroke, breaststroke, and butterfly.</p>
+                                </div>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-box" style="background-color: #2ebf83;"></span>
+                                <div>
+                                    <strong>GP Stamp</strong>
+                                    <p>The “Love, GP” logo is for the Great Piranha, the character we tell the younger kids made the signs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="section-title">The Color Palette</h2>
+                    <p class="section-desc">The design system is built around the exact same 10 colors used in the crayola markers we used.</p>
+                    <div class="color-palette-grid">
+                        <div class="color-swatch-card" style="--swatch-color: #906cc4;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Purple</h4>
+                                <code>#906cc4</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #ff5c60;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Red</h4>
+                                <code>#ff5c60</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #ffae30;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Orange</h4>
+                                <code>#ffae30</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #fee250;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Yellow</h4>
+                                <code>#fee250</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #2ebf83;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Green</h4>
+                                <code>#2ebf83</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #0570e5;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Blue</h4>
+                                <code>#0570e5</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #8A93FF;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Lavender</h4>
+                                <code>#8A93FF</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #3debd9;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Cyan</h4>
+                                <code>#3debd9</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #009bb0;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Teal</h4>
+                                <code>#009bb0</code>
+                            </div>
+                        </div>
+                        <div class="color-swatch-card" style="--swatch-color: #ac0194;">
+                            <div class="swatch-preview"></div>
+                            <div class="swatch-info">
+                                <h4>Magenta</h4>
+                                <code>#ac0194</code>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="section-title">Outer Borders Gallery</h2>
+                    <p class="section-desc">A few 15-18s (at the time) and I 17 drew the borders, and I scanned them in high resolution and processed them for the system. Hover over them to see the dynamic hue-rotation filter shift their color scheme in real time.</p>
+                    <div class="borders-grid outer-borders" id="outer-borders-container"></div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="section-title">Inner Borders Gallery</h2>
+                    <div class="borders-grid inner-borders" id="inner-borders-container"></div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="section-title">Combinatorial Variations</h2>
+                    <p class="section-desc">By combining outer/inner border layers and shifting hues (their colors) dynamically, the mathematical layout possibilities are immense:</p>
+                    
+                    <div class="about-card borders-math-card">
+                        <div class="about-card-badge">Borders</div>
+                        <h3>19.8 Million Border Configurations</h3>
+                        <p>To guarantee every swimmer receives a completely unique layout, the frame borders are built as two modular, overlaying parts:</p>
+                        <div class="borders-math-flex">
+                            <div class="borders-math-col">
+                                <strong>Outer Frames (17 variations)</strong>
+                                <p>Four-sided border frames containing hand-sketched stripes, waves, and hashes.</p>
+                            </div>
+                            <div class="borders-math-col">
+                                <strong>Inner Frames (9 variations)</strong>
+                                <p>Interior border borders (including the signature <code>gp</code> border) that outline name boxes.</p>
+                            </div>
+                            <div class="borders-math-col">
+                                <strong>Independent Hue Rotations</strong>
+                                <p>An SVG <code>feColorMatrix</code> hue rotation filter rotates the color spectrum of each layer dynamically (0° to 360°).</p>
+                            </div>
+                        </div>
+                        <div class="borders-math-banner">
+                            17 (Outer) × 9 (Inner) × 360 (Outer Hues) × 360 (Inner Hues) = 19,828,800 Unique Frame Style Combinations!
+                        </div>
+                    </div>
+                </section>
+
+                <section class="about-section">
+                    <h2 class="section-title">Mascots &amp; Stroke Icons</h2>
+                    <p class="section-desc">I embedded graphics directly into characters <code>0-9</code> of the custom <code>Marker Sans Mini</code> font. This keeps the document size tiny and ensures icons scale to any size without blurriness.</p>
+                    
+                    <h3 class="glyphs-heading-1">Stroke Rhyme Glyphs</h3>
+                    <div class="glyphs-grid">
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #fee250;">0</span>
+                            <div class="glyph-info">
+                                <strong>Free Stroke</strong>
+                                <p>"When you swim free, first place you'll be!"</p>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #ff5c60; color: white;">1</span>
+                            <div class="glyph-info">
+                                <strong>Back Stroke</strong>
+                                <p>"When you swim back, you show no lack!"</p>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #8A93FF;">2</span>
+                            <div class="glyph-info">
+                                <strong>Breast Stroke</strong>
+                                <p>"When you swim breast, you are the best!"</p>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #2ebf83; color: white;">3</span>
+                            <div class="glyph-info">
+                                <strong>Fly Stroke</strong>
+                                <p>"When you swim fly, you wave bye-bye!"</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="glyphs-heading-2">Team Mascot &amp; Meet Decorators</h3>
+                    <div class="glyphs-grid">
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #ffae30;">4</span>
+                            <div class="glyph-info">
+                                <strong>Bubbles</strong>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #3debd9;">5</span>
+                            <div class="glyph-info">
+                                <strong>Piranha</strong>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #0570e5; color: white;">6</span>
+                            <div class="glyph-info">
+                                <strong>#1</strong>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #fee250;">7</span>
+                            <div class="glyph-info">
+                                <strong>Swim Fast!</strong>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #ac0194; color: white;">8</span>
+                            <div class="glyph-info">
+                                <strong>Good luck!</strong>
+                            </div>
+                        </div>
+                        <div class="glyph-card">
+                            <span class="glyph-preview font-mini" style="background-color: #906cc4; color: white;">9</span>
+                            <div class="glyph-info">
+                                <strong>Eat my bubbles!</strong>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <section class="about-section team-love">
+                    <h2 class="section-title">The Love, GP Signature</h2>
+                    <p class="section-desc">Every sign includes the classic Love, Gp signature we used to add to each sign.</p>
+                    <div class="lovegp-showcase">
+                        <img src="../borders/lovegp.png" alt="Love GP Logo" class="lovegp-img" />
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- App Logic -->
+    <script type="module" src="./about.js"></script>
+</body>
+</html>
