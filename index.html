@@ -15,31 +15,188 @@
 </head>
 <body>
 
-    <!-- Upload Screen -->
+    <!-- Upload/Landing Screen -->
     <div id="upload-screen" class="screen active">
-        <div class="upload-box">
-            <div class="brand">
-                <h1>Parklawn Sign Generator</h1>
-                <p class="description">Upload a meet sheet PDF to automatically extract swimmers and generate gp signs.</p>
-            </div>
-            
-            <div class="upload-zone">
-                <input type="file" id="pdf-input" accept="application/pdf" class="hidden" />
-                <button type="button" class="btn btn-primary btn-large" onclick="document.getElementById('pdf-input').click();">
-                    Select Meet Sheet PDF
-                </button>
-            </div>
-            
-            <div id="progress-container" class="progress-container hidden">
-                <div class="progress-bar">
-                    <div id="progress-bar-fill" class="progress-bar-fill"></div>
-                </div>
-                <div id="progress-text" class="progress-text">Preparing extraction...</div>
+        <!-- Top Mode Switcher -->
+        <div class="top-mode-switcher-bar">
+            <div class="mode-switcher-pill">
+                <button type="button" id="mode-btn-gp" class="mode-switch-btn active" onclick="switchAppMode('gp-signs')">GP Signs</button>
+                <button type="button" id="mode-btn-pp" class="mode-switch-btn" onclick="switchAppMode('paper-plate')">Paper Plates</button>
             </div>
         </div>
 
-        <div class="learn-more-container">
-            <a href="./about/" class="learn-more-link">Learn how signs are generated</a>
+        <!-- Main Scrollable Content Viewport -->
+        <div class="upload-main-viewport">
+            <!-- GP Signs Landing View -->
+            <div id="gp-signs-view" class="welcome-container mode-view active">
+                <!-- Left Column: Branding and Project Overview -->
+                <div class="welcome-brand-column">
+                    <div class="brand">
+                        <span class="brand-badge">SwimTopia Powered</span>
+                        <h1>Parklawn Sign Generator</h1>
+                        <p class="description">Generate custom, high-resolution swim signs for your meets, powered directly by your team's SwimTopia account.</p>
+                    </div>
+
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon">🏊</span>
+                            <div class="feature-content">
+                                <strong>Live SwimTopia Roster Sync</strong>
+                                <p>Automatically fetches swimmers & best stroke events directly from SwimTopia.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">⚡</span>
+                            <div class="feature-content">
+                                <strong>Automatic Absence Filtering</strong>
+                                <p>Excludes absent swimmers for the selected meet so only attending kids get signs.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="brand-actions">
+                        <button type="button" class="btn btn-primary btn-large" onclick="addBlankSignAndOpenEditor()">Start from Scratch</button>
+                        <a href="./about/" class="btn btn-secondary btn-large">Learn More</a>
+                    </div>
+                </div>
+
+                <!-- Right Column: SwimTopia Sign-In & Meet Selector Panel -->
+                <div class="swimtopia-panel-column">
+                    <div id="swimtopia-card" class="swimtopia-card">
+                        <!-- Logged-Out View -->
+                        <div id="swimtopia-signed-out-view" class="swimtopia-view">
+                            <div class="card-title-group">
+                                <span class="title-badge">SwimTopia Connect</span>
+                                <h2>Sign In</h2>
+                                <p class="card-sub">Log in with your SwimTopia credentials to select a meet and populate signs.</p>
+                            </div>
+
+                            <form id="swimtopia-login-form" class="swimtopia-form" onsubmit="event.preventDefault(); handleSwimtopiaLogin();">
+                                <div class="input-group">
+                                    <label for="swimtopia-email">Email / Username</label>
+                                    <input type="text" id="swimtopia-email" placeholder="coach@example.com" required autocomplete="username" />
+                                </div>
+                                <div class="input-group">
+                                    <label for="swimtopia-password">Password</label>
+                                    <input type="password" id="swimtopia-password" placeholder="••••••••••••" required autocomplete="current-password" />
+                                </div>
+                                <button type="submit" id="swimtopia-login-btn" class="btn btn-primary btn-large">
+                                    Sign In to SwimTopia
+                                </button>
+                            </form>
+
+                            <div id="swimtopia-login-status" class="status-msg hidden"></div>
+                        </div>
+
+                        <!-- Logged-In View -->
+                        <div id="swimtopia-signed-in-view" class="swimtopia-view hidden">
+                            <div class="user-status-bar">
+                                <span class="status-indicator">Connected</span>
+                                <button type="button" class="btn-link-signout" onclick="handleSwimtopiaLogout()">Sign Out</button>
+                            </div>
+
+                            <div class="card-title-group">
+                                <h2>Select a Meet</h2>
+                                <p class="card-sub">Choose an upcoming meet to generate signs for attending swimmers.</p>
+                            </div>
+
+                            <div class="meet-select-group">
+                                <label for="meet-select">Available Swim Meets</label>
+                                <select id="meet-select" class="meet-select" onchange="updateMeetGenerateBtnState()">
+                                    <option value="">Loading meets...</option>
+                                </select>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <label class="custom-checkbox">
+                                    <input type="checkbox" id="exclude-absent-check" checked />
+                                    <span>Exclude absent swimmers for this meet</span>
+                                </label>
+                            </div>
+
+                            <button type="button" id="generate-meet-btn" class="btn btn-primary btn-large" onclick="handleGenerateFromMeet()" disabled>
+                                Generate Signs from Meet
+                            </button>
+
+                            <div id="swimtopia-progress-container" class="progress-container hidden">
+                                <div class="progress-bar">
+                                    <div id="swimtopia-progress-bar-fill" class="progress-bar-fill"></div>
+                                </div>
+                                <div id="swimtopia-progress-text" class="progress-text">Loading meet data...</div>
+                            </div>
+
+                            <div id="swimtopia-meet-status" class="status-msg hidden"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paper Plate Landing View -->
+            <div id="paper-plate-view" class="welcome-container mode-view hidden">
+                <!-- Left Column: Branding Overview -->
+                <div class="welcome-brand-column">
+                    <div class="brand">
+                        <span class="brand-badge">CSV POWERED</span>
+                        <h1>Paper Plate Generator</h1>
+                        <p class="description">Upload CSV files to create custom swim signs with awards centered in GP Sans Cap and swimmer names in GP Sans Mini.</p>
+                    </div>
+
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon">📄</span>
+                            <div class="feature-content">
+                                <strong>Multi-CSV Support</strong>
+                                <p>Import multiple CSV spreadsheets simultaneously for team awards & meets.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">⚡</span>
+                            <div class="feature-content">
+                                <strong>Custom Gender Splits</strong>
+                                <p>Configure column mapping and Boy/Girl divisions for each file during setup.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: CSV File Upload & File Management Panel -->
+                <div class="swimtopia-panel-column">
+                    <div class="swimtopia-card paperplate-uploader-card">
+                        <div class="card-title-group">
+                            <span class="title-badge">CSV Import</span>
+                            <h2>Upload Files</h2>
+                            <p class="card-sub">Upload CSV spreadsheet files containing swimmer names and paper plate awards.</p>
+                        </div>
+
+                        <div class="uploader-section">
+                            <div class="uploader-header">
+                                <button type="button" class="btn btn-primary btn-large" onclick="document.getElementById('csv-file-input').click()">
+                                    Upload CSV Files
+                                </button>
+                                <input type="file" id="csv-file-input" accept=".csv, text/csv, .txt" multiple style="display:none;" onchange="handleCSVFilesSelect(this.files)"/>
+                            </div>
+
+                            <div id="csv-files-list" class="csv-files-list hidden">
+                                <!-- CSV file cards with row count and remove button rendered here -->
+                            </div>
+                        </div>
+
+                        <div class="inspector-card-footer" style="margin-top: 24px;">
+                            <button type="button" id="generate-paperplates-btn" class="btn btn-primary btn-large" onclick="handleGeneratePaperPlates()" disabled>
+                                Generate Paper Plates
+                            </button>
+                            <div id="pp-status-msg" class="status-msg hidden"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Center Resume Bar -->
+        <div class="bottom-resume-bar">
+            <button type="button" id="resume-project-btn" class="btn btn-primary btn-large hidden" onclick="resumePreviousProject()">
+                Resume Active Signs (<span id="resume-count-badge">0</span>)
+            </button>
         </div>
     </div>
 
@@ -47,19 +204,24 @@
     <div id="editor-screen" class="screen">
         <header id="header-bar">
             <div class="header-left">
-                <div class="header-title-group">
+                <button type="button" class="btn btn-secondary btn-icon" onclick="goToUpload()" title="Back" aria-label="Back">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div id="header-title-group" class="header-title-group">
                     <input type="text" id="meet-info-input" placeholder="Meet Title & Date" value="Parklawn Sign Generator" oninput="updateMeetInfo(this.value)" />
                     <span id="swimmer-count-badge" class="badge">0 Swimmers</span>
                 </div>
+                <div id="editor-file-tabs-bar" class="editor-file-tabs-bar hidden">
+                    <!-- CSV file tabs rendered here in editor header for paper plates -->
+                </div>
             </div>
             <div class="header-right">
-                <a href="./about/" class="btn btn-secondary" style="text-decoration: none;">
-                    About the Art
-                </a>
-                <button class="btn btn-secondary" onclick="addBlankSign();">
-                    Add Swimmer
+                <button type="button" class="btn btn-secondary" id="new-sign-btn" onclick="addBlankSign();">
+                    New Sign
                 </button>
-                <button class="btn btn-primary" id="export-pdf-btn" onclick="exportToPDF();">
+                <button type="button" class="btn btn-primary" id="export-pdf-btn" onclick="exportToPDF();">
                     Export PDF
                 </button>
             </div>
@@ -71,7 +233,40 @@
         </main>
     </div>
 
+    <!-- Paper Plate Gender Split Modal Overlay -->
+    <div id="pp-split-modal-overlay" class="modal-overlay hidden">
+        <div class="pp-split-modal">
+            <div class="modal-header">
+                <div class="modal-title-group" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span id="pp-modal-step-badge" class="modal-badge">STEP 1 OF 1</span>
+                        <span id="pp-modal-step-text" style="font-size: 12px; font-weight: 800; color: var(--muted-text-color);">File 1 of 1</span>
+                    </div>
+                    <h2>Configure Swimmer Gender Splits</h2>
+                    <p class="modal-subtitle">Select where the gap separates Boys and Girls, and map CSV columns for each file.</p>
 
+                    <!-- Top Wizard Progress Bar -->
+                    <div class="modal-wizard-progress-bar" style="margin-top: 12px; height: 6px; background-color: #e0e0e0; border: 2px solid var(--border-color); overflow: hidden;">
+                        <div id="modal-wizard-progress-fill" class="modal-wizard-progress-fill" style="height: 100%; background-color: #000000; width: 100%; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+                <button type="button" class="btn-modal-close" onclick="closePaperPlateSplitModal()" aria-label="Close Modal" style="margin-left: 16px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="pp-split-modal-body" class="pp-split-modal-body">
+                <!-- Dynamically rendered active CSV file configuration -->
+            </div>
+
+            <div id="pp-split-modal-footer" class="modal-footer">
+                <!-- Dynamic wizard footer buttons (Previous, Next, Cancel, Confirm) -->
+            </div>
+        </div>
+    </div>
 
     <!-- Hidden Print Container -->
     <div id="print-container"></div>

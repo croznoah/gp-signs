@@ -1,4 +1,7 @@
 import embeddedAssetsSource from "./assets_embedded.js?raw";
+import { layoutAwardText, layoutFirstNameText } from "./textSizing.js";
+
+export { fitFirstNameFontSize } from "./textSizing.js";
 
 function readEmbeddedAsset(name) {
     return embeddedAssetsSource.match(new RegExp(`const ${name} = "([^"]+)"`))?.[1] || "";
@@ -29,6 +32,13 @@ export const strokeDetails = {
     breast: { text: "When you swim breast<br>you are the best!", icon: "2" },
     fly: { text: "When you swim fly<br>you wave bye-bye!", icon: "3" }
 };
+
+function escapeSvgText(value) {
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
 
 // Returns a <rect> clipped to the given clipPath id, filled with color + texture overlay
 // This replicates CSS `background-clip: text` behavior in pure SVG
@@ -62,6 +72,15 @@ export function svgDefs(swimmer, forExport) {
 }
 
 // Build front SVG string
+function formatNameForDisplay(name) {
+    if (!name) return "";
+    const str = name.trim();
+    if (str === str.toUpperCase() || str === str.toLowerCase()) {
+        return str.replace(/\b\w+/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+    }
+    return str;
+}
+
 // Build front SVG string
 export function buildFrontSVG(swimmer, forExport, pathPrefix = "") {
     const W = 1100, H = 850;
@@ -69,12 +88,85 @@ export function buildFrontSVG(swimmer, forExport, pathPrefix = "") {
     const sfx = forExport ? 'e' : 'p'; // 'p'review vs 'e'xport namespace
     const cls = forExport ? '' : 'class="front-svg"';
 
+    if (swimmer.isPaperPlate) {
+        const awardText = (swimmer.award || swimmer.firstname || "SPECIAL AWARD").toUpperCase().trim();
+        const rawFullName = (swimmer.fullname || `${swimmer.firstname || ''} ${swimmer.lastname || ''}`).trim();
+        const showFullName = rawFullName.length > 0 && !swimmer.isHeaderPlate;
+        const fullNameText = showFullName ? formatNameForDisplay(rawFullName) : '';
+
+        const { lines, fontSize, lineHeight, startY } = layoutAwardText(awardText, showFullName);
+
+        let awardClips = '', awardEls = '';
+        lines.forEach((line, idx) => {
+            const lineY = startY + (idx * lineHeight);
+            const clipId = `cap${sfx}${sid}_${idx}`;
+            const safeLine = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            awardClips += `
+                <clipPath id="${clipId}">
+                    <text x="${W / 2}" y="${lineY}" font-family="Marker Sans" font-size="${fontSize}" text-anchor="middle" letter-spacing="0.9">${safeLine}</text>
+                </clipPath>`;
+            awardEls += texEl(clipId, swimmer.namecolor || '#000000', `tp${sid}`, W, H);
+        });
+
+        // Bottom Swimmer Name (Marker Sans Mini) placed centered at Y=680 (moved up, not all caps)
+        let nameClip = '', nameEl = '';
+        if (showFullName) {
+            let nameFontSize = Math.min(58, Math.max(34, Math.floor(880 / (fullNameText.length * 0.55))));
+            const nameY = 680;
+            const nameClipId = `cnmini${sfx}${sid}`;
+            const safeName = fullNameText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            nameClip = `
+                <clipPath id="${nameClipId}">
+                    <text x="${W / 2}" y="${nameY}" font-family="Marker Sans Mini" font-size="${nameFontSize}" text-anchor="middle">${safeName}</text>
+                </clipPath>`;
+            nameEl = texEl(nameClipId, swimmer.stroketopcolor || '#000000', `tp${sid}`, W, H);
+        }
+
+        return `<svg ${cls} viewBox="0 0 ${W} ${H}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            ${svgDefs(swimmer, forExport)}
+            <defs>
+                ${awardClips}
+                ${nameClip}
+            </defs>
+            <rect width="${W}" height="${H}" fill="white"/>
+            <image href="${pathPrefix}borders/outer/${swimmer.outerborder || 1}.png" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" filter="url(#ho${sid})"/>
+            <image href="${pathPrefix}borders/inner/${swimmer.innerborder || 1}.png" x="${W*0.01}" y="${H*0.01}" width="${W*0.98}" height="${H*0.98}" preserveAspectRatio="none" filter="url(#hi${sid})"/>
+            ${awardEls}
+            ${nameEl}
+        </svg>`;
+    }
+
     const strokeTop = swimmer.strokes[0] ? strokeDetails[swimmer.strokes[0]] : null;
     const strokeBottom = swimmer.strokes[1] ? strokeDetails[swimmer.strokes[1]] : null;
 
     // --- Name text layout ---
-    const nameX = W / 2;
-    const nameY = H / 2 + swimmer.nameinputsize * 0.35;
+    // Keep the GP-sign name entirely between the bottom of the top stroke
+    // graphic and the top of the bottom stroke graphic. Paper plates use their
+    // separate award layout above and are intentionally unaffected.
+    const topStrokeSize = Number(swimmer.stroketopsize) || 50;
+    const bottomStrokeSize = Number(swimmer.strokebottomsize) || 50;
+    const topStrokeIconSize = topStrokeSize * 2.17;
+    const topGraphicBottom = Math.max(
+        (H * 0.18) + (topStrokeIconSize * 0.85),
+        (H * 0.18) + (topStrokeSize * 2.1)
+    ) + 10;
+    const bottomGraphicTop = (H * 0.82) - (bottomStrokeSize * 2.17) - 35 - 10;
+    const firstNameLayout = layoutFirstNameText(swimmer.firstname, {
+        topY: topGraphicBottom,
+        bottomY: bottomGraphicTop,
+    });
+    let firstNameClips = "";
+    let firstNameEls = "";
+    firstNameLayout.lines.forEach((line, index) => {
+        const lineY = firstNameLayout.startY + (index * firstNameLayout.lineHeight);
+        const clipId = `cn${sfx}${sid}_${index}`;
+        firstNameClips += `
+            <clipPath id="${clipId}">
+                <text x="${W / 2}" y="${lineY}" font-family="Marker Sans" font-size="${firstNameLayout.fontSize}" text-anchor="middle" letter-spacing="0.9">${escapeSvgText(line)}</text>
+            </clipPath>`;
+        firstNameEls += texEl(clipId, swimmer.namecolor, `tp${sid}`, W, H);
+    });
 
     // --- Graphic icon layout ---
     const grX = W * 0.14;
@@ -137,9 +229,7 @@ export function buildFrontSVG(swimmer, forExport, pathPrefix = "") {
     return `<svg ${cls} viewBox="0 0 ${W} ${H}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
         ${svgDefs(swimmer, forExport)}
         <defs>
-            <clipPath id="cn${sfx}${sid}">
-                <text x="${nameX}" y="${nameY}" font-family="Marker Sans" font-size="${swimmer.nameinputsize}" text-anchor="middle" letter-spacing="0.9">${swimmer.firstname.toUpperCase()}</text>
-            </clipPath>
+            ${firstNameClips}
             <clipPath id="cg${sfx}${sid}">
                 <text x="${grX}" y="${grY}" font-family="Marker Sans Mini" font-size="${swimmer.graphicsize}">${swimmer.randomgraphic}</text>
             </clipPath>
@@ -149,7 +239,7 @@ export function buildFrontSVG(swimmer, forExport, pathPrefix = "") {
         <rect width="${W}" height="${H}" fill="white"/>
         <image href="${pathPrefix}borders/outer/${swimmer.outerborder}.png" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" filter="url(#ho${sid})"/>
         <image href="${pathPrefix}borders/inner/${swimmer.innerborder}.png" x="${W*0.01}" y="${H*0.01}" width="${W*0.98}" height="${H*0.98}" preserveAspectRatio="none" filter="url(#hi${sid})"/>
-        ${texEl(`cn${sfx}${sid}`, swimmer.namecolor, `tp${sid}`, W, H)}
+        ${firstNameEls}
         ${texEl(`cg${sfx}${sid}`, swimmer.graphiccolor, `tp${sid}`, W, H)}
         ${stTopEls}
         ${stBotEls}
